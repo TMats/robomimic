@@ -195,6 +195,7 @@ def create_env_for_data_processing(
     camera_height, 
     camera_width, 
     reward_shaping,
+    additional_camera=None,
 ):
     """
     Creates environment for processing dataset observations and rewards.
@@ -228,6 +229,8 @@ def create_env_for_data_processing(
     env_kwargs.pop("camera_height", None)
     env_kwargs.pop("camera_width", None)
     env_kwargs.pop("reward_shaping", None)
+    # add adittional camera configs
+    env_kwargs["additional_camera"] = additional_camera
 
     return env_class.create_for_data_processing(
         env_name=env_name, 

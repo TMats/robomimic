@@ -47,6 +47,7 @@ from copy import deepcopy
 import robomimic.utils.tensor_utils as TensorUtils
 import robomimic.utils.file_utils as FileUtils
 import robomimic.utils.env_utils as EnvUtils
+from robomimic.utils.mujoco_utils import MujocoArenaXML
 from robomimic.envs.env_base import EnvBase
 
 
@@ -142,12 +143,19 @@ def extract_trajectory(
 def dataset_states_to_obs(args):
     # create environment to use for data processing
     env_meta = FileUtils.get_env_metadata_from_dataset(dataset_path=args.dataset)
+    # Add camera specified in additional camera config file
+    if args.additional_camera_config:
+        additional_camera = json.load(open(args.additional_camera_config, 'r'))
+        args.camera_names.extend([cfg["camera_name"] for cfg in additional_camera])
+    else:
+        additional_camera = None
     env = EnvUtils.create_env_for_data_processing(
         env_meta=env_meta,
         camera_names=args.camera_names, 
         camera_height=args.camera_height, 
         camera_width=args.camera_width, 
         reward_shaping=args.shaped,
+        additional_camera=additional_camera,
     )
 
     print("==== Using environment with the following metadata ====")
@@ -183,6 +191,14 @@ def dataset_states_to_obs(args):
         initial_state = dict(states=states[0])
         if is_robosuite_env:
             initial_state["model"] = f["data/{}".format(ep)].attrs["model_file"]
+            model_xml = f["data/{}".format(ep)].attrs["model_file"]
+            if len(additional_camera) > 0:
+                arena = MujocoArenaXML(model_xml)
+                for cfg in additional_camera:
+                    # add camera config to xml
+                    arena.set_camera(**cfg)
+                model_xml = arena.get_xml()
+            initial_state["model"] = model_xml
 
         # extract obs, rewards, dones
         actions = f["data/{}/actions".format(ep)][()]
@@ -271,6 +287,13 @@ if __name__ == "__main__":
         nargs='+',
         default=[],
         help="(optional) camera name(s) to use for image observations. Leave out to not use image observations.",
+    )
+
+    parser.add_argument(
+        "--additional_camera_config",
+        type=str,
+        default=None,
+        help="path to additional camera config JSON file"
     )
 
     parser.add_argument(
