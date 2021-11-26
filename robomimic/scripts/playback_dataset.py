@@ -57,6 +57,7 @@ Example usage below:
 
 import os
 import json
+from xml.etree.ElementTree import parse
 import h5py
 import argparse
 import imageio
@@ -66,6 +67,7 @@ import robomimic
 import robomimic.utils.obs_utils as ObsUtils
 import robomimic.utils.env_utils as EnvUtils
 import robomimic.utils.file_utils as FileUtils
+from robomimic.utils.mujoco_utils import MujocoArenaXML
 from robomimic.envs.env_base import EnvBase
 
 
@@ -244,7 +246,18 @@ def playback_dataset(args):
         states = f["data/{}/states".format(ep)][()]
         initial_state = dict(states=states[0])
         if is_robosuite_env:
-            initial_state["model"] = f["data/{}".format(ep)].attrs["model_file"]
+            # initial_state["model"] = f["data/{}".format(ep)].attrs["model_file"]
+            model_xml = f["data/{}".format(ep)].attrs["model_file"]
+            if args.additional_camera_config is not None:
+                arena = MujocoArenaXML(model_xml)
+                camera_cfgs = json.load(open(args.additional_camera_config, 'r'))
+                for cfg in camera_cfgs:
+                    # make the camera render
+                    args.render_image_names.append(cfg["camera_name"])
+                    # add camera config to xml
+                    arena.set_camera(**cfg)
+                model_xml = arena.get_xml()
+            initial_state["model"] = model_xml
 
         # supply actions if using open-loop action playback
         actions = None
@@ -333,6 +346,13 @@ if __name__ == "__main__":
         nargs='+',
         default=["agentview"],
         help="(optional) camera name(s) / image observation(s) to use for rendering on-screen or to video",
+    )
+
+    parser.add_argument(
+        "--additional_camera_config",
+        type=str,
+        default=None,
+        help="path to additional camera config JSON file"
     )
 
     # Only use the first frame of each episode
