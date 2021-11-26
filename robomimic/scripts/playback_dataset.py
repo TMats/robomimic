@@ -182,7 +182,13 @@ def playback_trajectory_with_obs(
 def playback_dataset(args):
     # some arg checking
     write_video = (args.video_path is not None)
-    assert not (args.render and write_video) # either on-screen or video but not both
+    assert not (args.render and write_video) # either on-screen or video but not both\
+    # Add camera specified in additional camera config file
+    if args.additional_camera_config:
+        additional_camera_cfgs = json.load(open(args.additional_camera_config, 'r'))
+        args.render_image_names.extend([cfg["camera_name"] for cfg in additional_camera_cfgs])
+    else:
+        additional_camera_cfgs = []
     if args.render:
         # on-screen rendering can only support one camera
         assert len(args.render_image_names) == 1
@@ -248,12 +254,9 @@ def playback_dataset(args):
         if is_robosuite_env:
             # initial_state["model"] = f["data/{}".format(ep)].attrs["model_file"]
             model_xml = f["data/{}".format(ep)].attrs["model_file"]
-            if args.additional_camera_config is not None:
+            if len(additional_camera_cfgs) > 0:
                 arena = MujocoArenaXML(model_xml)
-                camera_cfgs = json.load(open(args.additional_camera_config, 'r'))
-                for cfg in camera_cfgs:
-                    # make the camera render
-                    args.render_image_names.append(cfg["camera_name"])
+                for cfg in additional_camera_cfgs:
                     # add camera config to xml
                     arena.set_camera(**cfg)
                 model_xml = arena.get_xml()
