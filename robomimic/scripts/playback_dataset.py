@@ -170,7 +170,7 @@ def playback_trajectory_with_obs(
     for i in range(traj_len):
         if video_count % video_skip == 0:
             # concatenate image obs together
-            im = [traj_grp["obs/{}".format(k)][i] for k in image_names]
+            im = [traj_grp["obs/{}_image".format(k)][i] for k in image_names]
             frame = np.concatenate(im, axis=1)
             video_writer.append_data(frame)
         video_count += 1
