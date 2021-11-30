@@ -3,8 +3,7 @@ import json
 import numpy as np
 from sklearn.utils.extmath import cartesian
 from scipy.spatial.transform import Rotation as R
-from pyquaternion import Quaternion
-
+import os
 
 def polar2cartesian(position):
     x = position[0] * np.sin(position[1]) * np.cos(position[2])
@@ -49,6 +48,18 @@ def generate_pose_in_hemisphere(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config_path",
+        type=str,
+        default="",
+        help="path to save config file"
+    )
+    parser.add_argument(
+        "--filename",
+        type=str,
+        default='testview.json',
+        help="filename of config file"
+    )
     parser.add_argument(
         "--center",
         type=float,
@@ -99,6 +110,7 @@ if __name__ == "__main__":
                 "camera_attribs": {}
             }
         )
+    config_path = os.path.join(args.config_path, args.filename)
     with open("testview.json", "w") as f:
         json.dump(pose_list, f, indent=2) 
     
