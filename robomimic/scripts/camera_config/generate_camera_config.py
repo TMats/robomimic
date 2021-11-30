@@ -111,7 +111,7 @@ if __name__ == "__main__":
             }
         )
     config_path = os.path.join(args.config_path, args.filename)
-    with open("testview.json", "w") as f:
+    with open(config_path, "w") as f:
         json.dump(pose_list, f, indent=2) 
     
 
