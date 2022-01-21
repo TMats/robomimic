@@ -13,6 +13,8 @@ docker run -itd \
     -p 18880:8888 \
     -e DISPLAY=:0\
     -v ${PWD}/../:/root/${PROJECT_NAME} \
+    -v ${PWD}/../../robosuite:/root/robosuite \
+    -v ${PWD}/../../mujoco-py:/root/mujoco-py \
     -v /data/docker_home/matsushima/dataset:/root/dataset \
     --name ${CONTAINER_NAME} \
     ${IMAGE_NAME}:${TAG_NAME} \

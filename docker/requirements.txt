@@ -19,4 +19,4 @@ gin-config @ git+https://github.com/google/gin-config@243ba87b3fcfeb2efb4a920b8f
 gym
 mujoco-py<2.1,>=2.0
 cmake
-robosuite @ git+https://github.com/ARISE-Initiative/robosuite@d9baa17d5328d7b0ec15ecda54c76c61bb983124
+robosuite @ git+https://github.com/TMats/robosuite@6c71f4f466d488e482c5c445f4e9759cdefe0ac9

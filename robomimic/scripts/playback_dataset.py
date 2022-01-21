@@ -57,6 +57,7 @@ Example usage below:
 
 import os
 import json
+from xml.etree.ElementTree import parse
 import h5py
 import argparse
 import imageio
@@ -66,6 +67,7 @@ import robomimic
 import robomimic.utils.obs_utils as ObsUtils
 import robomimic.utils.env_utils as EnvUtils
 import robomimic.utils.file_utils as FileUtils
+from robomimic.utils.mujoco_utils import MujocoArenaXML
 from robomimic.envs.env_base import EnvBase
 
 
@@ -168,7 +170,7 @@ def playback_trajectory_with_obs(
     for i in range(traj_len):
         if video_count % video_skip == 0:
             # concatenate image obs together
-            im = [traj_grp["obs/{}".format(k)][i] for k in image_names]
+            im = [traj_grp["obs/{}_image".format(k)][i] for k in image_names]
             frame = np.concatenate(im, axis=1)
             video_writer.append_data(frame)
         video_count += 1
@@ -180,7 +182,13 @@ def playback_trajectory_with_obs(
 def playback_dataset(args):
     # some arg checking
     write_video = (args.video_path is not None)
-    assert not (args.render and write_video) # either on-screen or video but not both
+    assert not (args.render and write_video) # either on-screen or video but not both\
+    # Add camera specified in additional camera config file
+    if args.additional_camera_config:
+        additional_camera_cfgs = json.load(open(args.additional_camera_config, 'r'))
+        args.render_image_names.extend([cfg["camera_name"] for cfg in additional_camera_cfgs])
+    else:
+        additional_camera_cfgs = []
     if args.render:
         # on-screen rendering can only support one camera
         assert len(args.render_image_names) == 1
@@ -244,7 +252,15 @@ def playback_dataset(args):
         states = f["data/{}/states".format(ep)][()]
         initial_state = dict(states=states[0])
         if is_robosuite_env:
-            initial_state["model"] = f["data/{}".format(ep)].attrs["model_file"]
+            # initial_state["model"] = f["data/{}".format(ep)].attrs["model_file"]
+            model_xml = f["data/{}".format(ep)].attrs["model_file"]
+            if len(additional_camera_cfgs) > 0:
+                arena = MujocoArenaXML(model_xml)
+                for cfg in additional_camera_cfgs:
+                    # add camera config to xml
+                    arena.set_camera(**cfg)
+                model_xml = arena.get_xml()
+            initial_state["model"] = model_xml
 
         # supply actions if using open-loop action playback
         actions = None
@@ -333,6 +349,13 @@ if __name__ == "__main__":
         nargs='+',
         default=["agentview"],
         help="(optional) camera name(s) / image observation(s) to use for rendering on-screen or to video",
+    )
+
+    parser.add_argument(
+        "--additional_camera_config",
+        type=str,
+        default=None,
+        help="path to additional camera config JSON file"
     )
 
     # Only use the first frame of each episode
