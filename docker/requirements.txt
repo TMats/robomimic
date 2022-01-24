@@ -17,6 +17,6 @@ immutabledict
 opencv-python==4.5.3.56
 gin-config @ git+https://github.com/google/gin-config@243ba87b3fcfeb2efb4a920b8f19679b61a6f0dc
 gym
-mujoco-py<2.1,>=2.0
+# mujoco-py<2.1,>=2.0
 cmake
 robosuite @ git+https://github.com/TMats/robosuite@6c71f4f466d488e482c5c445f4e9759cdefe0ac9
