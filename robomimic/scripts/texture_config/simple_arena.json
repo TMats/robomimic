@@ -1,0 +1,9 @@
+{
+    "floor": [0.0, 0.0, 0.0, 1.0],
+    "wall_leftcorner_visual": [0.0, 0.0, 0.0, 1.0],
+    "wall_rightcorner_visual": [0.0, 0.0, 0.0, 1.0],
+    "wall_left_visual": [0.0, 0.0, 0.0, 1.0],
+    "wall_right_visual": [0.0, 0.0, 0.0, 1.0],
+    "wall_rear_visual": [0.0, 0.0, 0.0, 1.0],
+    "wall_front_visual": [0.0, 0.0, 0.0, 1.0]
+}
