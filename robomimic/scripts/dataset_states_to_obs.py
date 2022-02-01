@@ -208,8 +208,6 @@ def dataset_states_to_obs(args):
             for geom_name, rgba in texture_config.items():
                 rgba = np.array(rgba, dtype=np.float)
                 geom_id = env.env.sim.model.geom_name2id(geom_name)
-                # env.env.sim.model.geom_rgba[geom_id] = 0.0
-                # env.env.sim.model.geom_rgba[geom_id, 3] = 1.0
                 env.env.sim.model.geom_rgba[geom_id] = rgba
             model_xml = env.env.sim.model.get_xml()
             initial_state["model"] = model_xml
