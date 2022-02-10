@@ -40,7 +40,7 @@ def split_config_from_json(source_json_path, test_ratio=0.1):
     test_json_path = os.path.join(root_json_path, source_json_name + '-test.json')
 
     train_views, test_views = train_test_split(views, test_size=test_ratio)
-    print("{} test views out of {} total demonstrations.".format(len(test_views), len(views)))
+    print("{} test views out of {} total views.".format(len(test_views), len(views)))
 
     with open(train_json_path, "w") as f:
         json.dump(train_views, f, indent=2) 
