@@ -290,6 +290,7 @@ class EnvRobosuite(EB.EnvBase):
         camera_height, 
         camera_width, 
         reward_shaping, 
+        override_obs_modality_specs=True,
         **kwargs,
     ):
         """
@@ -333,13 +334,14 @@ class EnvRobosuite(EB.EnvBase):
             # v0.3 only had support for one image, and it was named "rgb"
             assert len(image_modalities) == 1
             image_modalities = ["rgb"]
-        obs_modality_specs = {
-            "obs": {
-                "low_dim": [], # technically unused, so we don't have to specify all of them
-                "rgb": image_modalities,
+        if override_obs_modality_specs:
+            obs_modality_specs = {
+                "obs": {
+                    "low_dim": [], # technically unused, so we don't have to specify all of them
+                    "rgb": image_modalities,
+                }
             }
-        }
-        ObsUtils.initialize_obs_utils_with_obs_specs(obs_modality_specs)
+            ObsUtils.initialize_obs_utils_with_obs_specs(obs_modality_specs)
 
         # note that @postprocess_visual_obs is False since this env's images will be written to a dataset
         return cls(

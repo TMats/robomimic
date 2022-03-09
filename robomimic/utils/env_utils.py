@@ -199,6 +199,7 @@ def create_env_for_data_processing(
     camera_width, 
     reward_shaping,
     additional_camera=None,
+    override_obs_modality_specs=True,
 ):
     """
     Creates environment for processing dataset observations and rewards.
@@ -240,6 +241,7 @@ def create_env_for_data_processing(
         camera_names=camera_names, 
         camera_height=camera_height, 
         camera_width=camera_width, 
-        reward_shaping=reward_shaping, 
+        reward_shaping=reward_shaping,
+        override_obs_modality_specs=override_obs_modality_specs,
         **env_kwargs,
     )
