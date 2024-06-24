@@ -37,6 +37,9 @@ def get_env_class(env_meta=None, env_type=None, env=None):
     elif env_type == EB.EnvType.GYM_TYPE:
         from robomimic.envs.env_gym import EnvGym
         return EnvGym
+    elif env_type == EB.EnvType.IG_MOMART_TYPE:
+        from robomimic.envs.env_ig_momart import EnvGibsonMOMART
+        return EnvGibsonMOMART
     raise Exception("code should never reach this point")
 
 
@@ -196,6 +199,7 @@ def create_env_for_data_processing(
     camera_width, 
     reward_shaping,
     additional_camera=None,
+    override_obs_modality_specs=True,
 ):
     """
     Creates environment for processing dataset observations and rewards.
@@ -237,6 +241,7 @@ def create_env_for_data_processing(
         camera_names=camera_names, 
         camera_height=camera_height, 
         camera_width=camera_width, 
-        reward_shaping=reward_shaping, 
+        reward_shaping=reward_shaping,
+        override_obs_modality_specs=override_obs_modality_specs,
         **env_kwargs,
     )

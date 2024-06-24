@@ -49,7 +49,7 @@ class EnvRobosuite(EB.EnvBase):
         # robosuite version check
         self._is_v1 = (robosuite.__version__.split(".")[0] == "1")
         if self._is_v1:
-            assert (robosuite.__version__.split(".")[1] == "2"), "only support robosuite v0.3 and v1.2+"
+            assert (int(robosuite.__version__.split(".")[1]) >= 2), "only support robosuite v0.3 and v1.2+"
 
         kwargs = deepcopy(kwargs)
 
@@ -181,10 +181,10 @@ class EnvRobosuite(EB.EnvBase):
             di = self.env._get_observations(force_update=True) if self._is_v1 else self.env._get_observation()
         ret = {}
         for k in di:
-            if ObsUtils.key_is_image(k):
+            if (k in ObsUtils.OBS_KEYS_TO_MODALITIES) and ObsUtils.key_is_obs_modality(key=k, obs_modality="rgb"):
                 ret[k] = di[k][::-1]
                 if self.postprocess_visual_obs:
-                    ret[k] = ObsUtils.process_image(ret[k])
+                    ret[k] = ObsUtils.process_obs(obs=ret[k], obs_key=k)
 
         # "object" key contains object information
         ret["object"] = np.array(di["object-state"])
@@ -195,7 +195,8 @@ class EnvRobosuite(EB.EnvBase):
                 # ensures that we don't accidentally add robot wrist images a second time
                 pf = robot.robot_model.naming_prefix
                 for k in di:
-                    if k.startswith(pf) and (k not in ret) and (not k.endswith("proprio-state")):
+                    if k.startswith(pf) and (k not in ret) and \
+                            (not k.endswith("proprio-state")) and (k in ObsUtils.OBS_KEYS_TO_MODALITIES):
                         ret[k] = np.array(di[k])
         else:
             # minimal proprioception for older versions of robosuite
@@ -289,6 +290,7 @@ class EnvRobosuite(EB.EnvBase):
         camera_height, 
         camera_width, 
         reward_shaping, 
+        override_obs_modality_specs=True,
         **kwargs,
     ):
         """
@@ -329,16 +331,17 @@ class EnvRobosuite(EB.EnvBase):
         if is_v1:
             image_modalities = ["{}_image".format(cn) for cn in camera_names]
         elif has_camera:
-            # v0.3 only had support for one image, and it was named "image"
+            # v0.3 only had support for one image, and it was named "rgb"
             assert len(image_modalities) == 1
-            image_modalities = ["image"]
-        obs_modality_specs = {
-            "obs": {
-                "low_dim": [], # technically unused, so we don't have to specify all of them
-                "image": image_modalities,
+            image_modalities = ["rgb"]
+        if override_obs_modality_specs:
+            obs_modality_specs = {
+                "obs": {
+                    "low_dim": [], # technically unused, so we don't have to specify all of them
+                    "rgb": image_modalities,
+                }
             }
-        }
-        ObsUtils.initialize_obs_utils_with_obs_specs(obs_modality_specs)
+            ObsUtils.initialize_obs_utils_with_obs_specs(obs_modality_specs)
 
         # note that @postprocess_visual_obs is False since this env's images will be written to a dataset
         return cls(

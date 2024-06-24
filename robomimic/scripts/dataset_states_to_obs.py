@@ -200,6 +200,18 @@ def dataset_states_to_obs(args):
                 model_xml = arena.get_xml()
             initial_state["model"] = model_xml
 
+        # simplify textures
+        if args.texture_config is not None:
+            env.reset()
+            _obs = env.reset_to(initial_state)
+            texture_config = json.load(open(args.texture_config, 'r'))
+            for geom_name, rgba in texture_config.items():
+                rgba = np.array(rgba, dtype=np.float)
+                geom_id = env.env.sim.model.geom_name2id(geom_name)
+                env.env.sim.model.geom_rgba[geom_id] = rgba
+            model_xml = env.env.sim.model.get_xml()
+            initial_state["model"] = model_xml
+
         # extract obs, rewards, dones
         actions = f["data/{}/actions".format(ep)][()]
         traj = extract_trajectory(
@@ -255,12 +267,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dataset",
         type=str,
+        required=True,
         help="path to input hdf5 dataset",
     )
     # name of hdf5 to write - it will be in the same directory as @dataset
     parser.add_argument(
         "--output_name",
         type=str,
+        required=True,
         help="name of output hdf5 dataset",
     )
 
@@ -294,6 +308,13 @@ if __name__ == "__main__":
         type=str,
         default=None,
         help="path to additional camera config JSON file"
+    )
+
+    parser.add_argument(
+        "--texture_config",
+        type=str,
+        default=None,
+        help="path to texture config JSON file"
     )
 
     parser.add_argument(

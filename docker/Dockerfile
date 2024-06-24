@@ -65,20 +65,21 @@ RUN apt-get update && \
 RUN curl -o /usr/local/bin/patchelf https://s3-us-west-2.amazonaws.com/openai-sci-artifacts/manual-builds/patchelf_0.9_amd64.elf && \
     chmod +x /usr/local/bin/patchelf
 
+# For mujoco200
 RUN mkdir -p /root/.mujoco && \
-    wget https://www.roboti.us/download/mujoco200_linux.zip -O mujoco.zip && \
-    unzip mujoco.zip -d /root/.mujoco && \
-    mv /root/.mujoco/mujoco200_linux /root/.mujoco/mujoco200 && \
-    #wget https://www.mujoco.org/download/mujoco210-linux-x86_64.tar.gz -O mujoco.tar.gz && \
-    #tar -xf mujoco.tar.gz -C /root/.mujoco && \
-    #rm mujoco.tar.gz
-    rm mujoco.zip
-
-# COPY mjkey.txt /root/.mujoco/mjkey.txt
+   wget https://www.roboti.us/download/mujoco200_linux.zip -O mujoco.zip && \
+   unzip mujoco.zip -d /root/.mujoco && \
+   mv /root/.mujoco/mujoco200_linux /root/.mujoco/mujoco200 && \
+   rm mujoco.zip
 RUN wget https://roboti.us/file/mjkey.txt && \
     mv mjkey.txt /root/.mujoco/mjkey.txt
-
 ENV LD_LIBRARY_PATH /root/.mujoco/mujoco200/bin:${LD_LIBRARY_PATH}
+
+# # For mujoco210
+# RUN mkdir -p /root/.mujoco && \
+#     wget https://www.mujoco.org/download/mujoco210-linux-x86_64.tar.gz -O mujoco.tar.gz && \
+#     tar -xf mujoco.tar.gz -C /root/.mujoco && \
+#     rm mujoco.tar.gz
 # ENV LD_LIBRARY_PATH /root/.mujoco/mujoco210/bin:${LD_LIBRARY_PATH}
 
 COPY requirements.txt /root/requirements.txt
